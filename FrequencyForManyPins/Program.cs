@@ -2,6 +2,7 @@
 using System.Device;
 using System.Device.Gpio;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace FrequencyForManyPins
 {
@@ -9,13 +10,13 @@ namespace FrequencyForManyPins
     {
         static void Main(string[] args)
         {
-            var gpio = new GpioController();
-
-            var iMapping = new int[] { 3, 5, 7, 11, 13, 15, 19, 21, 23, 29, 31, 33 };
-            var oMapping = new int[] { 35, 37, 12, 16, 18, 22, 24, 26 };
+            var iMapping = new int[] { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+            var oMapping = new int[] { 17, 18, 22, 23, 24, 25, 26, 27,  };
 
             int inputPinCount = iMapping.Length;
             int outputPinCount = oMapping.Length;
+
+            var gpio = new GpioController();
 
             // define pin mode
             for (int i = 0; i < inputPinCount; ++i) gpio.OpenPin(iMapping[i], PinMode.Input);
@@ -24,7 +25,7 @@ namespace FrequencyForManyPins
             // warm up
             for (int i = 0; i < inputPinCount; ++i)  gpio.Read(iMapping[i]);
 
-            StopWatch stopWatch = StopWatch.StartNew();
+            var stopWatch = Stopwatch.StartNew();
             int cycleCounter = 0;
 
             // Loop for 10 seconds
@@ -35,9 +36,11 @@ namespace FrequencyForManyPins
                 for (int i = 0; i < outputPinCount; ++i) gpio.Write(oMapping[i], PinValue.Low);
                 ++cycleCounter;
             }
-            Console.WriteLine($"Read/Write frequency for {inputPinCount} input pins an ");
-            Console.WriteLine($"{outputPinCount} output pins : ");
-            Console.WriteLine($"{ cycleCounter / stopWatch.Elapsed.TotalSeconds } Hz");
+            Console.WriteLine("Read/Write frequency for " + inputPinCount + " inputs and "
+                               + outputPinCount + " outputs : "
+                               + (cycleCounter / stopWatch.Elapsed.TotalSeconds).ToString("N", CultureInfo.InvariantCulture)
+                               + "Hz"); ;
+            Console.WriteLine("Running for : " + stopWatch.Elapsed.TotalSeconds + " seconds.");
         }
     }
 }
